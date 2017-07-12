@@ -31,11 +31,11 @@ while current_patient <=100
         choice = questdlg(sprintf('Scribbling complete for patient %i frame %i - save?',current_patient,current_frame),'Save scribble','Yes','No','No');
         switch choice
             case 'Yes'
-                MRIwrite(scrigit clone bbled,fullfile(patient_path,scrib_filename))
+                MRIwrite(scribbled,fullfile(patient_path,scrib_filename))
             otherwise
                 disp('Not saving')
         end
         clearvars scribbled input_scan input_gt
-        current_patient = current_patient + 1;
     end
+    current_patient = current_patient + 1;
 end
