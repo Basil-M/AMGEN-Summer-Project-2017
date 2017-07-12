@@ -1,4 +1,4 @@
-function [ scribbles ] = manual_scribble( scan, mask_gt,varargin)
+function [ scribbles ] = freehand_scribble( scan, mask_gt,varargin)
 %Manual scribbles
 
 
@@ -126,10 +126,17 @@ while sliceNo <= slice_count
                 set(mTextBox,'string',{sprintf('SCRIBBLING ON LABEL %s',num2str(label_num));...
                                        'Hit Enter/Return to finish selecting points'})
                 %Get new mask
-                [x,y] = ginput();
-                x(x>size(grayscale,2)) = size(grayscale,2); x(x<1)=1;
-                y(y>size(grayscale,1)) = size(grayscale,1); y(y<1)=1;
-                new_mask = generate_scribble_stroke(x,y,size(grayscale,1),size(grayscale,2),1);
+                c = getPosition(imfreehand('Closed',0));
+                x = c(:,1);
+                y = c(:,2);
+                
+                %Clip to fit
+                x(x<1)=1;
+                y(y<1)=1;
+                x(x>size(grayscale,2)) = size(grayscale,2);
+                y(y>size(grayscale,1)) = size(grayscale,1);
+                
+                new_mask = generate_freehand_stroke(x,y,size(grayscale,1),size(grayscale,2),1);
                 %Update old mask
                 old_mask = new_vals(:,:,sliceNo);                       
                 old_mask((old_mask == label_num)) = 0;                  %Remove old mask for this label
