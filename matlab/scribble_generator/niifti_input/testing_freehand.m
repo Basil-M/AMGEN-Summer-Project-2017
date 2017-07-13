@@ -2,36 +2,36 @@ folder_path = '/scratch/bmustafa/datasets/ACDC/ACDC_challenge_20170617/';
 
 %INITIALISE LOOP
 %CHECK LOG FILE
-% if exist(fullfile(folder_path,'log.txt'))
-%     done = csvread(fullfile(folder_path,'log.txt'));
-%     if length(done) > 0
-%         choice = questdlg(sprintf('Annotations recorded up to and including patient %03d frame %02d. Continue or start from scratch?', ...
-%                                   done(length(done),1), done(length(done),2)), 'Initialising...','Continue','Start over','Continue');
-%         switch choice
-%             case 'Continue'
-%                 if length(done) > 1
-%                     if done(length(done) - 1, 1) == done(length(done), 1)
-%                         %Both frames for final patient were annotated
-%                         current_patient = done(length(done),1) + 1;
-%                         skip_frame = false;
-%                     else
-%                         current_patient = done(length(done),1);
-%                         skip_frame = true;
-%                     end
-%                 else
-%                     current_patient = done(length(done),1);
-%                     skip_frame = true;
-%                 end
-%             otherwise
-%                 current_patient = 1;
-%                 skip_frame = false;
-%         end
-%     else
-%         edit(fullfile(folder_path,'log.txt'));
-%         current_patient = 1;
-%         skip_frame = false;
-%     end
-% end
+if exist(fullfile(folder_path,'log.txt'))
+    done = csvread(fullfile(folder_path,'log.txt'));
+    if length(done) > 0
+        choice = questdlg(sprintf('Annotations recorded up to and including patient %03d frame %02d. Continue or start from scratch?', ...
+                                  done(length(done),1), done(length(done),2)), 'Initialising...','Continue','Start over','Continue');
+        switch choice
+            case 'Continue'
+                if length(done) > 1
+                    if done(length(done) - 1, 1) == done(length(done), 1)
+                        %Both frames for final patient were annotated
+                        current_patient = done(length(done),1) + 1;
+                        skip_frame = false;
+                    else
+                        current_patient = done(length(done),1);
+                        skip_frame = true;
+                    end
+                else
+                    current_patient = done(length(done),1);
+                    skip_frame = true;
+                end
+            otherwise
+                current_patient = 1;
+                skip_frame = false;
+        end
+    else
+        edit(fullfile(folder_path,'log.txt'));
+        current_patient = 1;
+        skip_frame = false;
+    end
+end
 
 while current_patient <=100
     %FIND FILES IN CURRENT PATIENT FOLDER
@@ -39,12 +39,12 @@ while current_patient <=100
     current_files = dir([patient_path '*gt.nii.gz']);
     
     %skip frame if already done
-%     if skip_frame
-%         start_i = 2;
-%         skip_frame = false;
-%     else
-%         start_i = 1;
-%     end
+    if skip_frame
+        start_i = 2;
+        skip_frame = false;
+    else
+        start_i = 1;
+    end
     
     for i = start_i:numel(current_files)
         %get frame number
@@ -70,9 +70,9 @@ while current_patient <=100
         switch choice
             case 'Yes'
                 MRIwrite(scribbled,fullfile(patient_path,scrib_filename));
-%                 log_file = fopen(fullfile(folder_path,'log.txt'),'a');
-%                 fprintf(log_file,'\n%d,%d',current_patient,current_frame);
-%                 fclose(log_file)
+                log_file = fopen(fullfile(folder_path,'log.txt'),'a');
+                fprintf(log_file,'\n%d,%d',current_patient,current_frame);
+                fclose(log_file)
             otherwise
                 disp('Not saving');
         end
