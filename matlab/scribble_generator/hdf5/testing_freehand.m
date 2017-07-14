@@ -1,5 +1,9 @@
+%ADJUSTABLE PARAMETERS
 hdf_folder = '/scratch/bmustafa/acdc_segmenter_internal/preproc_data/';
 hdf_fname = 'data_2D_size_212_212_res_1.36719_1.36719.hdf5';
+slices_between_saves = 10;
+
+
 hdf_path = fullfile(hdf_folder,hdf_fname);
 %Get HDF5 info
 hdf_info = h5info(hdf_path);
@@ -38,11 +42,14 @@ if current_slice == 0; current_slice = 1; end;
 
 continue_scribbling = true;
 while current_slice < size(images_train,3) && continue_scribbling
+    if current_slice + slices_between_saves > size(images_train,3)
+        slices_between_saves = size(images_train,3) - current_slice + 1;
+    end
     %get freehand scribble
     try
-        scribbled = freehand_scribble(images_train(:,:,current_slice:current_slice+9), ...
-                                      masks_train(:,:,current_slice:current_slice+9), ...
-                                      scribbles_train(:,:,current_slice:current_slice+9), ...
+        scribbled = freehand_scribble(images_train(:,:,current_slice:current_slice+slices_between_saves - 1), ...
+                                      masks_train(:,:,current_slice:current_slice+slices_between_saves - 1), ...
+                                      scribbles_train(:,:,current_slice:current_slice+slices_between_saves - 1), ...
                                       current_slice);
     catch
         disp(sprintf(['Failed to get freehand scribble - likely just exited early. ' ...
@@ -51,15 +58,12 @@ while current_slice < size(images_train,3) && continue_scribbling
     end
     
     if continue_scribbling
-        %update scribble array
-        scribbles_train(:,:,current_slice:current_slice+9) = scribbled;
-
         %save to hdf5 file
-        h5write(hdf_path,'/scribbles_train',scribbled, [1 1 current_slice], [size(images_train,1) size(images_train,2) 10])
+        h5write(hdf_path,'/scribbles_train',scribbled, [1 1 current_slice], [size(images_train,1) size(images_train,2) +slices_between_saves])
 
         %clearvars scribbled
 
-        current_slice = current_slice + 10;
+        current_slice = current_slice + slices_between_saves;
 
         %update current_slice attribute
         h5writeatt(hdf_path,'/scribbles_train','current_slice',current_slice)
